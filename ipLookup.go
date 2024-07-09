@@ -2,7 +2,7 @@ package ipLookup
 
 import (
 	"errors"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"strings"
@@ -37,41 +37,41 @@ func (lookup *localLookup) GetIP() (ip net.IP, err error) {
 }
 
 // IPLookup defines a set of endpoints for which to look up this IP
-type ipLookup struct {
+type IPLookup struct {
 	endpoints []IPLookupEndpoint
 }
 
 // New creates a new IPLookup
-func New() *ipLookup {
-	return &ipLookup{}
+func New() *IPLookup {
+	return &IPLookup{}
 }
 
 // WithAWS adds the AWS IP lookup endpoint to the IPLookup object
-func (lookup *ipLookup) WithAWS() *ipLookup {
+func (lookup *IPLookup) WithAWS() *IPLookup {
 	lookup.endpoints = append(lookup.endpoints, &awsLookup{})
 	return lookup
 }
 
 // WithAPIfy adds the APIfy lookup endpoint to the IPLookup object
-func (lookup *ipLookup) WithAPIfy() *ipLookup {
+func (lookup *IPLookup) WithAPIfy() *IPLookup {
 	lookup.endpoints = append(lookup.endpoints, &apifyLookup{})
 	return lookup
 }
 
 // WithWTFIsMyIP adds the wtfismyip lookup endpoint to the IPLookup object
-func (lookup *ipLookup) WithWTFIsMyIP() *ipLookup {
+func (lookup *IPLookup) WithWTFIsMyIP() *IPLookup {
 	lookup.endpoints = append(lookup.endpoints, &wtfIsMyIPLookup{})
 	return lookup
 }
 
 // WithLocal adds the local lookup endpoint to the IPLookup object
-func (lookup *ipLookup) WithLocal() *ipLookup {
+func (lookup *IPLookup) WithLocal() *IPLookup {
 	lookup.endpoints = append(lookup.endpoints, &localLookup{})
 	return lookup
 }
 
 // GetIP gets the IP address for the given IPLookup
-func (lookup *ipLookup) GetIP() (ip net.IP, err error) {
+func (lookup *IPLookup) GetIP() (ip net.IP, err error) {
 	if len(lookup.endpoints) < 1 {
 		return ip, errors.New("Must specify at least one public or local endpoint")
 	}
@@ -105,7 +105,7 @@ func getPublicIP(endpoint string) (ip net.IP, err error) {
 	}
 
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return ip, err
 	}
